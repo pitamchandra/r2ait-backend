@@ -3,6 +3,7 @@ const express = require('express')
 const mongoose = require('mongoose')
 const cors = require('cors')
 const userHandler = require('./Routes/UserRoute')
+const teamHandler = require('./Routes/teamRoute')
 const app = express()
 
 const port = process.env.SERVER_PORT || 3000;
@@ -24,6 +25,7 @@ app.get('/', (req, res) => {
     res.send('server is running...')
 })
 app.use('/users', userHandler)
+app.use('/teams', teamHandler)
 
 app.listen(port, host, ()=> {
     console.log(`server is running on port ${host}:${port}`);
