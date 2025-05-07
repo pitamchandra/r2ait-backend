@@ -147,6 +147,31 @@ router.get('/admin', verifyToken, isAdmin, async (req, res) => {
         })
     }
 })
+router.patch('/:id', verifyToken, isAdmin, async (req, res) => {
+    const { id } = req.params;
+    try {
+        const user = await User.findByIdAndUpdate(id, req.body, { new : true})
+        if(user){
+            res.status(201).json({
+                status: "success",
+                message: "user updated successful",
+                data: user
+            })
+        }else{
+            res.status(404).json({
+                status: "failed",
+                message: "user not found"
+            })
+        }
+        
+    } catch (err) {
+        res.status(500).json({
+            status: "failed",
+            message: err.message
+        })
+    }
+
+})
 router.delete('/:id', verifyToken, isAdmin, async (req, res) => {
     const { id } = req.params
     try {
