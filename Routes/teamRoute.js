@@ -1,8 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const Team = require('../schemas/teamSchema')
+const { verifyToken, isAdmin } = require('../middlewares/authMiddleware')
 
-router.post("/", async (req, res) => {
+router.post("/", verifyToken, isAdmin, async (req, res) => {
     try {
         const team = Team(req.body)
         await team.save()
@@ -11,7 +12,6 @@ router.post("/", async (req, res) => {
             message: "team member added successfully",
             data: team
         })
-
     } catch (err) {
         res.status(500).json({
             status: "failed",
@@ -59,7 +59,7 @@ router.get("/:id", async (req, res) => {
         })
     }
 })
-router.patch("/:id", async (req, res) => {
+router.patch("/:id", verifyToken, isAdmin, async (req, res) => {
     const {id} = req.params
     try {
         const team = await Team.findByIdAndUpdate(id, req.body, {new : true})
@@ -83,7 +83,7 @@ router.patch("/:id", async (req, res) => {
         })
     }
 })
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", verifyToken, isAdmin, async (req, res) => {
     const {id} = req.params
     try {
         const team = await Team.findByIdAndDelete(id)
@@ -108,4 +108,4 @@ router.delete("/:id", async (req, res) => {
     }
 })
 
-module.exports = router
+module.exports = router;

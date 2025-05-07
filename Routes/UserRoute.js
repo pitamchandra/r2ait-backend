@@ -4,6 +4,7 @@ const router = express.Router()
 const User = require('../schemas/userSchema')
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
+const { verifyToken, isAdmin } = require('../middlewares/authMiddleware')
 
 router.post("/signup", async (req, res) => {
     try {
@@ -26,11 +27,15 @@ router.post("/signup", async (req, res) => {
     }
 })
 router.post("/login", async (req, res) => {
-    const {username, password} = req.body
-    // console.log(username, password);
+    const {email, username, password} = req.body
     try {
-        const user = await User.find({username: username});
-        if(user && user.length > 0){
+        const user = await User.find({
+            $or: [
+                {username: username},
+                {email: email}
+            ]
+        });
+        if(user && user.length > 0 ){
             const isValidUser = await bcrypt.compare(password, user[0].password);
             if(isValidUser){
                 const token = jwt.sign(
@@ -60,6 +65,7 @@ router.post("/login", async (req, res) => {
                 message: "Authentication Error"
             })
         }
+        
     } catch (err) {
         res.status(500).json({
             status: "failed",
@@ -67,7 +73,7 @@ router.post("/login", async (req, res) => {
         })
     }
 })
-router.patch("/:id", async(req, res) => {
+router.patch("/:id", verifyToken, isAdmin, async(req, res) => {
     const { id } = req.params;
     const { name, username, email, password, role, imageUrl } = req.body;
     // console.log(req.body);
@@ -111,7 +117,7 @@ router.patch("/:id", async(req, res) => {
         })
     }
 })
-router.get('/all', async (req, res) => {
+router.get('/all', verifyToken, isAdmin, async (req, res) => {
     try {
         const allUsers = await User.find()
         res.status(200).json({
@@ -126,7 +132,7 @@ router.get('/all', async (req, res) => {
         })
     }
 })
-router.get('/admin', async (req, res) => {
+router.get('/admin', verifyToken, isAdmin, async (req, res) => {
     try {
         const admins = await User.find({role: "admin"})
         res.status(200).json({
@@ -141,7 +147,7 @@ router.get('/admin', async (req, res) => {
         })
     }
 })
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', verifyToken, isAdmin, async (req, res) => {
     const { id } = req.params
     try {
         const deletedUser = await User.findByIdAndDelete(id)
