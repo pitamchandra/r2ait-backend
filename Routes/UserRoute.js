@@ -51,6 +51,8 @@ router.post("/login", async (req, res) => {
                 res.status(200).json({
                     status: "success",
                     message: "login successful",
+                    id: user[0]._id,
+                    role: user[0].role,
                     access: token
                 })
             }else{
@@ -65,7 +67,6 @@ router.post("/login", async (req, res) => {
                 message: "Authentication Error"
             })
         }
-        
     } catch (err) {
         res.status(500).json({
             status: "failed",
@@ -73,7 +74,7 @@ router.post("/login", async (req, res) => {
         })
     }
 })
-router.patch("/:id", verifyToken, isAdmin, async(req, res) => {
+router.patch("/:id", verifyToken, async(req, res) => {
     const { id } = req.params;
     const { name, username, email, password, role, imageUrl } = req.body;
     // console.log(req.body);
@@ -117,7 +118,7 @@ router.patch("/:id", verifyToken, isAdmin, async(req, res) => {
         })
     }
 })
-router.get('/all', verifyToken, isAdmin, async (req, res) => {
+router.get('/all', async (req, res) => {
     try {
         const allUsers = await User.find()
         res.status(200).json({
@@ -147,7 +148,7 @@ router.get('/admin', verifyToken, isAdmin, async (req, res) => {
         })
     }
 })
-router.patch('/:id', verifyToken, isAdmin, async (req, res) => {
+router.patch('/:id', verifyToken, async (req, res) => {
     const { id } = req.params;
     try {
         const user = await User.findByIdAndUpdate(id, req.body, { new : true})

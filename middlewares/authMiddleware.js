@@ -14,7 +14,7 @@ const verifyToken = async (req, res, next) => {
     try {
         const decode = jwt.verify(token, process.env.SECRET_KEY);
         const user = await User.findById(decode.userId)
-        console.log(user);
+        // console.log(user);
         if(!user){
             return res.status(401).json({
                 status: "failed",
@@ -23,7 +23,6 @@ const verifyToken = async (req, res, next) => {
         }
         req.user = user;
         next()
-        
     } catch (err) {
         return res.status(500).json({
             status: "failed",

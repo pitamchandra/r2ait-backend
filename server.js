@@ -3,6 +3,8 @@ const express = require('express')
 const mongoose = require('mongoose')
 const cors = require('cors')
 const userHandler = require('./Routes/UserRoute')
+const categoryHandler = require('./Routes/categoryRoute')
+const servicesHandler = require('./Routes/servicesRoute')
 const teamHandler = require('./Routes/teamRoute')
 const app = express()
 
@@ -25,7 +27,10 @@ app.get('/', (req, res) => {
     res.send('server is running...')
 })
 app.use('/users', userHandler)
+app.use('/categories', categoryHandler)
+app.use('/services', servicesHandler)
 app.use('/teams', teamHandler)
+
 
 app.listen(port, host, ()=> {
     console.log(`server is running on port ${host}:${port}`);
