@@ -2,9 +2,12 @@ const mongoose = require("mongoose")
 
 const userSchema = new mongoose.Schema(
     {
-        name: {
+        firstName: {
             type: String,
             required: true
+        },
+        lastName:{
+            type: String,
         },
         username: {
             type: String,
@@ -20,14 +23,27 @@ const userSchema = new mongoose.Schema(
             type: String,
             required: true
         },
+        address: {
+            type: String,
+        },
         role: {
             type: String,
             enum: ['user', "admin"],
             default: "user"
         },
-        imageUrl: {
+        profileImage: {
             type: String
-        }
+        },
+        coverImage: String,
+        deviceToken: {
+            type: String,
+        },
+        phone: Number,
+        profession: String,
+        gender: String,
+        website: String,
+        dateOfBirth: Date
+        
     },
     { timestamps: true }
 )

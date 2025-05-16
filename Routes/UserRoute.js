@@ -8,10 +8,10 @@ const { verifyToken, isAdmin } = require('../middlewares/authMiddleware')
 
 router.post("/signup", async (req, res) => {
     try {
-        const {name, username, email, password, role, imageUrl} = req.body;
+        const {firstName, username, email, password, role, imageUrl} = req.body;
         const hashPassword = await bcrypt.hash(password, 10)
         const newUser = User({
-            name, username, email, password: hashPassword, role, imageUrl
+            firstName, username, email, password: hashPassword, role, imageUrl
         })
         await newUser.save()
         res.status(201).json({
@@ -27,12 +27,13 @@ router.post("/signup", async (req, res) => {
     }
 })
 router.post("/login", async (req, res) => {
-    const {email, username, password} = req.body
+    const {user_or_mail, password, deviceToken} = req.body;
+
     try {
         const user = await User.find({
             $or: [
-                {username: username},
-                {email: email}
+                {username: user_or_mail},
+                {email: user_or_mail}
             ]
         });
         if(user && user.length > 0 ){
@@ -76,19 +77,27 @@ router.post("/login", async (req, res) => {
 })
 router.patch("/:id", verifyToken, async(req, res) => {
     const { id } = req.params;
-    const { name, username, email, password, role, imageUrl } = req.body;
-    // console.log(req.body);
+    const { firstName, lastName, username, email, password, address, role, profileImage, coverImage, phone, profession, gender, website, dateOfBirth } = req.body;
+    console.log("params id", id);
     try {
         const updatedData = {}
         if(password){
             const hashPassword = await bcrypt.hash(password, 10)
             updatedData.password = hashPassword
         }
-        if(name) updatedData.name = name;
+        if(firstName) updatedData.firstName = firstName;
+        if(lastName) updatedData.lastName = lastName;
         if(username) updatedData.username = username;
         if(email) updatedData.email = email;
+        if(address) updatedData.address = address;
         if(role) updatedData.role = role;
-        if(imageUrl) updatedData.imageUrl = imageUrl;
+        if(profileImage) updatedData.profileImage = profileImage;
+        if(coverImage) updatedData.coverImage = coverImage;
+        if(phone) updatedData.phone = phone;
+        if(profession) updatedData.profession = profession;
+        if(gender) updatedData.gender = gender;
+        if(website) updatedData.website = website;
+        if(dateOfBirth) updatedData.dateOfBirth = website;
         if(Object.keys(updatedData).length > 0){
             const updatedUser = await User.findByIdAndUpdate(id, updatedData, {new: true})
             console.log(updatedUser);
@@ -108,7 +117,7 @@ router.patch("/:id", verifyToken, async(req, res) => {
         }else{
             res.status(404).json({
                 status: "failed",
-                message: "User not found"
+                message: "update data can't be empty"
             });
         }
     } catch (err) {
@@ -133,6 +142,29 @@ router.get('/all', async (req, res) => {
         })
     }
 })
+router.get('/all/:username', async (req, res) => {
+    const { username } = req.params;
+    console.log("request username",username);
+    try {
+        const exists = await User.find({username: username})
+        if(exists.length > 0){
+            res.status(200).json({
+                message: "exist the username",
+                valid: true
+            })
+        }else{
+            res.status(200).json({
+                message: "doesn't exist the username",
+                valid: false
+            })
+        }
+    } catch (err) {
+        res.status(500).json({
+            status: "failed",
+            message: err.message
+        })
+    }
+})
 router.get('/admin', verifyToken, isAdmin, async (req, res) => {
     try {
         const admins = await User.find({role: "admin"})
@@ -148,14 +180,14 @@ router.get('/admin', verifyToken, isAdmin, async (req, res) => {
         })
     }
 })
-router.patch('/:id', verifyToken, async (req, res) => {
+router.get('/:id', async (req, res) => {
     const { id } = req.params;
     try {
-        const user = await User.findByIdAndUpdate(id, req.body, { new : true})
+        const user = await User.find({_id: id})
         if(user){
             res.status(201).json({
                 status: "success",
-                message: "user updated successful",
+                message: "user getting successful",
                 data: user
             })
         }else{

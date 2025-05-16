@@ -30,11 +30,7 @@ const servicesSchema = mongoose.Schema(
                     required: true
                 }
             }
-        ],
-        category: {
-            type: String,
-            ref: 'category'
-        }
+        ]
     },
     {timestamps: true}
 )
