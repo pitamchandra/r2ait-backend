@@ -1,4 +1,3 @@
-
 const express = require('express')
 const router = express.Router()
 const User = require('../schemas/userSchema')
@@ -27,7 +26,7 @@ router.post("/signup", async (req, res) => {
     }
 })
 router.post("/login", async (req, res) => {
-    const {user_or_mail, password, deviceToken} = req.body;
+    const {user_or_mail, password} = req.body;
 
     try {
         const user = await User.find({
@@ -75,6 +74,32 @@ router.post("/login", async (req, res) => {
         })
     }
 })
+router.post('/change-password', verifyToken, async(req, res) => {
+    
+    try {
+        const {oldPassword, newPassword} = req.body;
+        const user = await User.findById(req.user._id).select('_id, password')
+        
+        const isMatch = await bcrypt.compare(oldPassword, user.password)
+        if(!isMatch) {
+            return res.status(404).json({
+                status: 'failed',
+                message: "Invalid Old Password"
+            })
+        }
+        const hashNewPassword = await bcrypt.hash(newPassword, 10);
+        await User.findByIdAndUpdate(req.user._id, {password: hashNewPassword})
+        res.status(201).json({
+            status: 'success',
+            message: 'password changed successfully'
+        })
+    } catch (err) {
+        res.status(500).json({
+            status: "failed",
+            message: err.message
+        })
+    }
+})
 router.patch("/:id", verifyToken, async(req, res) => {
     const { id } = req.params;
     const { firstName, lastName, username, email, password, address, role, profileImage, coverImage, phone, profession, gender, website, dateOfBirth } = req.body;
@@ -97,7 +122,7 @@ router.patch("/:id", verifyToken, async(req, res) => {
         if(profession) updatedData.profession = profession;
         if(gender) updatedData.gender = gender;
         if(website) updatedData.website = website;
-        if(dateOfBirth) updatedData.dateOfBirth = website;
+        if(dateOfBirth) updatedData.dateOfBirth = dateOfBirth;
         if(Object.keys(updatedData).length > 0){
             const updatedUser = await User.findByIdAndUpdate(id, updatedData, {new: true})
             console.log(updatedUser);

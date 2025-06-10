@@ -33,6 +33,6 @@ app.use('/services', servicesHandler)
 app.use('/teams', teamHandler)
 app.use('/cart', cartHandler)
 
-app.listen(port, host, ()=> {
-    console.log(`server is running on port ${host}:${port}`);
+app.listen(port, ()=> {
+    console.log(`server is running on port :${port}`);
 })
