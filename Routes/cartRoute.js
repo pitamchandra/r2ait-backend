@@ -40,23 +40,23 @@ router.post('/add', async (req, res) => {
     }
 })
 
-// router.get('/:userId', async (req, res) => {
-//     const {userId} = req.params;
-//     try {
-//         const cart = await Cart.findOne({user : userId});
-//         if(!cart) res.status(404).json({status: 'failed', message: 'cart is empty'})
-//         res.status(200).json({
-//             status: 'success',
-//             message: 'cart items getting',
-//             data: cart
-//         })
-//     } catch (err) {
-//         res.status(500).json({
-//             status: "success",
-//             message: err.message
-//         })
-//     }
-// })
+router.get('/:userId', async (req, res) => {
+    const {userId} = req.params;
+    try {
+        const cart = await Cart.findOne({user : userId});
+        if(!cart) res.status(404).json({status: 'failed', message: 'cart is empty'})
+        res.status(200).json({
+            status: 'success',
+            message: 'cart items getting',
+            data: cart
+        })
+    } catch (err) {
+        res.status(500).json({
+            status: "success",
+            message: err.message
+        })
+    }
+})
 
 router.patch('/update', async (req, res) => {
     const { userId, serviceId, quantity } = req.body;
