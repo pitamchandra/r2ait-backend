@@ -10,11 +10,9 @@ const cartHandler = require('./Routes/cartRoute')
 const app = express()
 
 const port = process.env.SERVER_PORT || 3000;
-const host = process.env.SERVER_IP || "103.145.138.116";
-
+// const host = process.env.SERVER_IP || "103.145.138.116";
 
 const uri = `mongodb+srv://${process.env.USER_NAME}:${process.env.PASSWORD}@cluster0.bnga9lj.mongodb.net/r2ait_db?retryWrites=true&w=majority&appName=Cluster0`;
-
 
 mongoose.connect(uri)
   .then(() => console.log("MongoDB connected"))

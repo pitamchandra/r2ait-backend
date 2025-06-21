@@ -40,23 +40,55 @@ router.post('/add', async (req, res) => {
     }
 })
 
-router.get('/:userId', async (req, res) => {
-    const {userId} = req.params;
+// router.get('/:userId', async (req, res) => {
+//     const {userId} = req.params;
+//     try {
+//         const cart = await Cart.findOne({user : userId});
+//         if(!cart) res.status(404).json({status: 'failed', message: 'cart is empty'})
+//         res.status(200).json({
+//             status: 'success',
+//             message: 'cart items getting',
+//             data: cart
+//         })
+//     } catch (err) {
+//         res.status(500).json({
+//             status: "success",
+//             message: err.message
+//         })
+//     }
+// })
+
+router.patch('/update', async (req, res) => {
+    const { userId, serviceId, quantity } = req.body;
+    const qty = parseInt(quantity);
+    
     try {
-        const cart = await Cart.findOne({user : userId});
-        if(!cart) res.status(404).json({status: 'failed', message: 'cart is empty'})
+        const cart = await Cart.findOne({ user: userId });
+        if (!cart) {
+            return res.status(404).json({ status: 'failed', message: 'Cart not found' });
+        }
+
+        const itemIndex = cart.items.findIndex(item => item.service.toString() === serviceId);
+        if (itemIndex === -1) {
+            return res.status(404).json({ status: 'failed', message: 'Service not found in cart' });
+        }
+
+        cart.items[itemIndex].quantity = qty;
+        await cart.save();
+
         res.status(200).json({
             status: 'success',
-            message: 'cart items getting',
+            message: 'Cart item quantity updated',
             data: cart
-        })
+        });
+
     } catch (err) {
         res.status(500).json({
-            status: "success",
+            status: 'failed',
             message: err.message
-        })
+        });
     }
-})
+});
 
 module.exports = router;
 
