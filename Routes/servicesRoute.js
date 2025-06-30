@@ -23,7 +23,7 @@ router.post('/', verifyToken, isAdmin, async (req, res) => {
 
 router.get('/', async (req, res) => {
     try {
-        const services = await Service.find({}, {_id: 0,}).populate('service_category')
+        const services = await Service.find().populate('service_category')
         res.status(200).json({
             status: "Success",
             message: "services getting successfully",

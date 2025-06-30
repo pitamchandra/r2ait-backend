@@ -22,7 +22,7 @@ router.post('/', verifyToken, isAdmin, async (req, res) => {
 })
 router.get('/', async (req, res) => {
     try {
-        const categories = await Category.find({}).populate('')
+        const categories = await Category.find({}).populate('services');
         res.status(200).json({
             status: "success",
             message: "Categories Getting successfully",
