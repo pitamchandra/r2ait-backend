@@ -7,6 +7,7 @@ const categoryHandler = require('./Routes/categoryRoute')
 const servicesHandler = require('./Routes/servicesRoute')
 const teamHandler = require('./Routes/teamRoute')
 const cartHandler = require('./Routes/cartRoute')
+const orderHandler = require('./Routes/orderRoute')
 const app = express()
 
 const port = process.env.SERVER_PORT || 3000;
@@ -30,6 +31,7 @@ app.use('/categories', categoryHandler)
 app.use('/services', servicesHandler)
 app.use('/teams', teamHandler)
 app.use('/cart', cartHandler)
+app.use('/order', orderHandler)
 
 app.listen(port, ()=> {
     console.log(`server is running on port :${port}`);

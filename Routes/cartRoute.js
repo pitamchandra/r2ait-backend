@@ -1,12 +1,31 @@
 const express = require('express');
 const router = express.Router();
 const Cart = require('../schemas/cartSchema');
+const mongoose  = require('mongoose');
+const { errorResponse } = require('../utils/responseHandler');
+const User = require('../schemas/userSchema');
+const serviceSchema = require('../schemas/serviceSchema');
 // const verifyToken = require('../middlewares/authMiddleware')
 
 router.post('/add', async (req, res) => {
     const {userId, serviceId, quantity = 1} = req.body;
     const qty = parseInt(quantity);
+    if(!mongoose.Types.ObjectId.isValid(userId)){
+        return errorResponse(res, 'invalid user id', {}, 400)
+    }
+    if(!mongoose.Types.ObjectId.isValid(serviceId)){
+        return errorResponse(res, 'invalid service id')
+    }
     try {
+        const userExists = await User.findById(userId)
+        if(!userExists) {
+            return errorResponse(res, "user not found", {}, 404)
+        }
+        const serviceExists = await serviceSchema.findById(serviceId);
+        if(!serviceExists){
+            return errorResponse(res, "service not found", {}, 404)
+        }
+
         let cart = await Cart.findOne({user : userId});
         
         if(!cart){

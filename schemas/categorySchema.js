@@ -14,12 +14,13 @@ const categorySchema = mongoose.Schema(
         category_description: {
             type: String
         },
-        // services:[
-        //     {
-        //         type: mongoose.Schema.Types.ObjectId,
-        //         ref: "service"
-        //     }
-        // ]
+        services:[
+            {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: "service",
+                required: true
+            }
+        ]
     },
     {
         timestamps: true
