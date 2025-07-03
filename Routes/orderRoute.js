@@ -17,20 +17,19 @@ router.post('/create', verifyToken, async (req, res) => {
         if(!cart || cart.items.length === 0){
             return errorResponse(res, "cart is empty", {}, 404)
         }
-        // console.log(cart);
+        // console.log("my cart", cart);
         const totalAmount = cart.items.reduce((accumulator, item) => {
             return accumulator + (item.service.price * item.quantity)
         }, 0);
         
         const tran_id = new ObjectId().toString();
         
-
         const data = {
         total_amount: totalAmount,
         currency: 'BDT',
         tran_id: tran_id, // use unique tran_id for each api call
-        success_url: `http://localhost:3000/payment/success/${tran_id}`,
-        fail_url: 'http://localhost:3030/fail',
+        success_url: `http://localhost:3000/order/payment/success/${tran_id}`,
+        fail_url:`http://localhost:3000/order/payment/fail/${tran_id}`,
         cancel_url: 'http://localhost:3030/cancel',
         ipn_url: 'http://localhost:3030/ipn',
         shipping_method: 'Courier',
@@ -60,45 +59,55 @@ router.post('/create', verifyToken, async (req, res) => {
         sslcz.init(data).then(async apiResponse => {
             let GatewayPageURL = apiResponse.GatewayPageURL;
             console.log("url", GatewayPageURL);
-            // const newOrder = new Order({
-            //     user: userId,
-            //     items: cart.items,
-            //     status: 'pending',
-            //     totalAmount,
-            //     transactionId: tran_id
-            // })
-            // await newOrder.save();
-            res.send({url: GatewayPageURL})
-            // Save order and clear cart AFTER getting payment URL
-            
+            const newOrder = new Order({
+                user: userId,
+                items: cart.items,
+                status: 'pending',
+                totalAmount,
+                transactionId: tran_id
+            })
+            await newOrder.save();
             // await Cart.findOneAndDelete({ user: userId });
-            // Only send one response
-
-            // res.status(201).json({
-            //     status: 'success',
-            //     message: 'Redirecting to payment gateway...',
-            //     order: newOrder,
-            //     url: "https://www.google.com/"
-            // });
+            res.status(201).json({
+                status: 'success',
+                message: 'Redirecting to payment gateway...',
+                order: newOrder,
+                url: GatewayPageURL
+            });
         }).catch(err => {
             return errorResponse(res, "Payment initialization failed", err.message);
         });
-        router.post('/payment/success/:tranId', async (req, res) => {
-            console.log(req.params.tranId);
-        })
-
-    // router.post('/payment/success/:tranId', async(req, res) => {
-    //     console.log("tran id from success", req.params.tranId);
-    // })
-
-    // await newOrder.save()
-    // await Cart.findOneAndDelete({user: userId})
-    // successResponse(res, "Order Placed Successfully", newOrder, 201 )
 
     } catch (error) {
         errorResponse(res, "data fetching failed", error.message)
     }
 
+})
+router.post('/payment/success/:tranId', async (req, res) => {
+    try {
+        const { tranId } = req.params;
+        const updatedOrder = await Order.findOneAndUpdate({transactionId: tranId}, { status: "confirmed"}, { new: true })
+        if(updatedOrder.status !== "confirmed"){
+            return errorResponse(res, "payment not confirmed")
+        }
+        res.redirect(`http://localhost:5173/order/payment/success/${tranId}`)
+    } catch (error) {
+        errorResponse(res, "transaction id not matching", error, 404)
+    }
+})
+
+router.post('/payment/fail/:tranId', async (req, res) => {
+    try {
+        const { tranId } = req.params;
+        // const deletedOrder = await Order.findOneAndDelete({transactionId: tranId})
+        // console.log("deleted Order", deletedOrder);
+        // if(updatedOrder.status){
+        //     return errorResponse(res, "payment not confirmed")
+        // }
+        res.redirect(`http://localhost:5173/order/payment/fail/${tranId}`)
+    } catch (error) {
+        errorResponse(res, "transaction id not matching", error.message, 404)
+    }
 })
 
 router.get('/user/:userId', verifyToken, async (req, res) => {
